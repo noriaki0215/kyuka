@@ -1,0 +1,23 @@
+body {
+    margin: 0; background: #0e2a1a; color: #e0c38c;
+    font-family: serif; overflow: hidden; touch-action: none;
+}
+#game-screen {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: space-around; height: 100vh; padding: 10px;
+}
+.deck-slot, #discard-area {
+    width: 60px; height: 90px; border: 2px solid #d4af37;
+    border-radius: 5px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+}
+#deck { background: #800; width: 100%; height: 100%; cursor: pointer; }
+#hand-container {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 4px;
+    width: 100%; max-width: 400px; min-height: 100px;
+}
+.card {
+    width: 55px; height: 85px; background: white; color: black;
+    border-radius: 3px; display: flex; align-items: center;
+    justify-content: center; font-weight: bold; border: 1px solid #333;
+}
