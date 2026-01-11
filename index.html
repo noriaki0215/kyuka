@@ -34,8 +34,8 @@
             <div class="opponent-hand" id="cpu1-hand"></div>
         </div>
 
-        <!-- 中央エリア（左CPU・場・右CPU） -->
-        <div id="middle-area">
+        <!-- 中央エリア -->
+        <div id="center-area">
             <!-- 左（CPU2） -->
             <div id="opponent-left" class="opponent-area opponent-side">
                 <div class="opponent-info vertical">
@@ -45,21 +45,26 @@
                 <div class="opponent-hand vertical" id="cpu2-hand"></div>
             </div>
 
-            <!-- 場 -->
+            <!-- 場（中央） -->
             <div id="field">
-                <div class="deck-slot">
-                    <div id="deck">
-                        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Hanafuda_back.svg" alt="山札" class="deck-img">
+                <!-- 上段：山札とポット -->
+                <div id="field-top">
+                    <div class="deck-slot">
+                        <div id="deck">
+                            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Hanafuda_back.svg" alt="山札" class="deck-img">
+                        </div>
+                        <div id="deck-count">0</div>
                     </div>
-                    <div id="deck-count">0</div>
+                    <div id="pot-display">
+                        <div id="pot-amount">0</div>
+                        <p>ポット</p>
+                    </div>
                 </div>
-                <div id="pot-display">
-                    <div id="pot-amount">0</div>
-                    <p>ポット</p>
-                </div>
-                <div id="discard-area">
-                    <div id="last-discard"></div>
-                    <p>捨て札</p>
+                
+                <!-- 捨て札エリア（河） -->
+                <div id="discard-river">
+                    <p class="river-label">捨て札</p>
+                    <div id="river-cards"></div>
                 </div>
             </div>
 

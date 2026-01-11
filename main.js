@@ -520,16 +520,29 @@ const game = {
     },
 
     updateDiscardDisplay() {
-        const discardEl = document.getElementById('last-discard');
-        if (this.lastDiscard) {
-            if (this.lastDiscard.image) {
-                discardEl.innerHTML = `<img src="${this.lastDiscard.image}" alt="${this.lastDiscard.name}" class="discard-img">`;
-            } else {
-                discardEl.innerHTML = `<span>${this.lastDiscard.month}</span>`;
+        const riverEl = document.getElementById('river-cards');
+        riverEl.innerHTML = '';
+        
+        this.discardPile.forEach((card, index) => {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'river-card';
+            
+            // 最後に捨てられた札をハイライト
+            if (index === this.discardPile.length - 1) {
+                cardEl.classList.add('latest');
             }
-        } else {
-            discardEl.innerHTML = '<span class="empty-discard">?</span>';
-        }
+            
+            if (card.image) {
+                cardEl.innerHTML = `<img src="${card.image}" alt="${card.name}">`;
+            } else {
+                cardEl.innerHTML = `<span style="font-size:10px;">${card.month}</span>`;
+            }
+            
+            riverEl.appendChild(cardEl);
+        });
+        
+        // 自動スクロールで最新の札を表示
+        riverEl.scrollTop = riverEl.scrollHeight;
     },
 
     updateAllChipsDisplay() {

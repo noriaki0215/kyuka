@@ -168,13 +168,14 @@ body {
 }
 
 /* 中央エリア */
-#middle-area {
+#center-area {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
     gap: 4px;
-    flex-shrink: 0;
+    flex: 1;
+    min-height: 0;
 }
 
 /* 左右のCPU */
@@ -219,16 +220,25 @@ body {
     flex-direction: column;
     gap: 6px;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 8px;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.25);
     border-radius: 10px;
-    flex-shrink: 0;
+    flex: 1;
+    min-height: 0;
+    max-width: 280px;
 }
 
-.deck-slot, #discard-area {
-    width: 50px;
-    height: 75px;
+#field-top {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+}
+
+.deck-slot {
+    width: 45px;
+    height: 68px;
     border: 2px solid #d4af37;
     border-radius: 5px;
     display: flex;
@@ -240,7 +250,7 @@ body {
 }
 
 #pot-display {
-    width: 60px;
+    width: 55px;
     height: 40px;
     border: 2px solid #d4af37;
     border-radius: 6px;
@@ -249,6 +259,57 @@ body {
     align-items: center;
     justify-content: center;
     background: rgba(212, 175, 55, 0.2);
+}
+
+/* 捨て札エリア（河） */
+#discard-river {
+    flex: 1;
+    width: 100%;
+    min-height: 60px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.river-label {
+    font-size: 9px;
+    color: #888;
+    margin: 0 0 2px 2px;
+    flex-shrink: 0;
+}
+
+#river-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    justify-content: flex-start;
+    align-content: flex-start;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.river-card {
+    width: 28px;
+    height: 42px;
+    border-radius: 3px;
+    border: 1px solid #8b7355;
+    overflow: hidden;
+    background: #fffef0;
+    flex-shrink: 0;
+}
+
+.river-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.river-card.latest {
+    border: 2px solid #4fc3f7;
+    box-shadow: 0 0 6px #4fc3f7;
 }
 
 #deck {
@@ -295,28 +356,6 @@ body {
     margin-top: 1px;
 }
 
-#last-discard {
-    width: 100%;
-    height: 70%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    font-weight: bold;
-    color: #fff;
-}
-
-.discard-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 2px;
-}
-
-.empty-discard {
-    font-size: 18px;
-    color: #666;
-}
 
 #pot-amount {
     font-size: 16px;
