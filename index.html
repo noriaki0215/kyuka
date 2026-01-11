@@ -8,29 +8,56 @@
 </head>
 <body>
     <div id="game-screen">
-        <!-- 相手情報 -->
-        <div id="cpu-info">
-            <span class="chip-icon">🎰</span>
-            相手のチップ: <span id="cpu-chips">500</span>
+        <!-- 対面（CPU1） -->
+        <div id="opponent-top" class="opponent-area">
+            <div class="opponent-info">
+                <span class="player-name">CPU1</span>
+                <span class="chip-display">💰<span id="cpu1-chips">500</span></span>
+            </div>
+            <div class="opponent-hand" id="cpu1-hand"></div>
         </div>
-        
-        <!-- 場 -->
-        <div id="field">
-            <div class="deck-slot">
-                <div id="deck">
-                    <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Hanafuda_back.svg" alt="山札" class="deck-img">
+
+        <!-- 中央エリア（左CPU・場・右CPU） -->
+        <div id="middle-area">
+            <!-- 左（CPU2） -->
+            <div id="opponent-left" class="opponent-area opponent-side">
+                <div class="opponent-info vertical">
+                    <span class="player-name">CPU2</span>
+                    <span class="chip-display">💰<span id="cpu2-chips">500</span></span>
                 </div>
-                <div id="deck-count">0</div>
+                <div class="opponent-hand vertical" id="cpu2-hand"></div>
             </div>
-            <div id="pot-display">
-                <div id="pot-amount">0</div>
-                <p>ポット</p>
+
+            <!-- 場 -->
+            <div id="field">
+                <div class="deck-slot">
+                    <div id="deck">
+                        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Hanafuda_back.svg" alt="山札" class="deck-img">
+                    </div>
+                    <div id="deck-count">0</div>
+                </div>
+                <div id="pot-display">
+                    <div id="pot-amount">0</div>
+                    <p>ポット</p>
+                </div>
+                <div id="discard-area">
+                    <div id="last-discard"></div>
+                    <p>捨て札</p>
+                </div>
             </div>
-            <div id="discard-area">
-                <div id="last-discard"></div>
-                <p>捨て札</p>
+
+            <!-- 右（CPU3） -->
+            <div id="opponent-right" class="opponent-area opponent-side">
+                <div class="opponent-info vertical">
+                    <span class="player-name">CPU3</span>
+                    <span class="chip-display">💰<span id="cpu3-chips">500</span></span>
+                </div>
+                <div class="opponent-hand vertical" id="cpu3-hand"></div>
             </div>
         </div>
+
+        <!-- 現在のターン表示 -->
+        <div id="turn-indicator"></div>
 
         <!-- 役表示 -->
         <div id="yaku-display"></div>
@@ -45,11 +72,11 @@
 
         <!-- プレイヤー情報 -->
         <div id="player-info">
-            <span class="chip-icon">🎰</span>
-            自分のチップ: <span id="player-chips">500</span>
+            <span class="player-name">あなた</span>
+            <span class="chip-display">💰<span id="player-chips">500</span></span>
         </div>
         
-        <!-- 手札 -->
+        <!-- 自分の手札 -->
         <div id="hand-container"></div>
         
         <!-- メッセージログ -->
