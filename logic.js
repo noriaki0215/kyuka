@@ -18,18 +18,19 @@ const logic = {
     },
 
     // 現在の手札で「あがり（御免）」が可能か判定
+    // 3メンツ(9枚) + 頭1枚 = 10枚であがり
     canGomen(hand) {
         const counts = this.countByMonth(hand);
-        let hasPair = false;
-        let sets = 0;
+        let singleCount = 0;  // 1枚だけの月（頭候補）
+        let sets = 0;         // 3枚揃い（メンツ）
 
         for (let month in counts) {
             if (counts[month] >= 3) sets++;
-            if (counts[month] === 2) hasPair = true;
+            if (counts[month] === 1) singleCount++;
         }
 
-        // 3セット(9枚) + 1ペア(2枚) = 11枚であがり
-        return (sets >= 3 && hasPair);
+        // 3メンツ(9枚) + 頭1枚 = 10枚であがり
+        return (sets >= 3 && singleCount >= 1 && hand.length === 10);
     },
 
     // ========================================

@@ -210,6 +210,13 @@ const game = {
         this.render();
         this.showYaku();
         
+        // 捨てた後、自分があがれるかチェック（10枚）
+        if (logic.canGomen(this.players.player.hand)) {
+            this.phase = 'gomen_check';
+            this.showMessage("🎉【御免可能】御免ボタンであがれます！スキップは山札タップ", true);
+            return;
+        }
+        
         // 他のCPUが頂戴/御免できるかチェック
         await this.checkOthersInterrupt(card, 'player');
         
@@ -253,13 +260,13 @@ const game = {
         if (this.currentPlayer !== 'player') return;
         
         const hand = this.players.player.hand;
-        if (hand.length !== 11) {
-            this.showMessage("手札が11枚の時のみ御免できます");
+        if (hand.length !== 10) {
+            this.showMessage("手札が10枚の時のみ御免できます");
             return;
         }
         
         if (!logic.canGomen(hand)) {
-            this.showMessage("あがりの形になっていません");
+            this.showMessage("あがりの形になっていません（3メンツ+頭1枚）");
             return;
         }
         
@@ -267,16 +274,30 @@ const game = {
         const points = logic.calculateYakuPoints(hand);
         
         let yakuText = yakuList.map(y => y.name).join("、") || "役なし";
-        this.showMessage(`御免！${yakuText}（${points}点）`);
+        this.showMessage(`🎊 御免！${yakuText}（${points}点）`);
         
         this.pot += points * 5;
         this.collectPot('player');
         this.endRound('player');
     },
 
+    // 御免をスキップして次のターンへ
+    async skipGomen() {
+        if (this.phase !== 'gomen_check') return;
+        
+        // 他のCPUが頂戴/御免できるかチェック
+        await this.checkOthersInterrupt(this.lastDiscard, 'player');
+        
+        if (this.roundOver) return;
+        
+        this.nextTurn();
+    },
+
+    // 捨て札を拾って10枚にした時にあがれるか
     canGomenWithDiscard(hand, card) {
+        // 手札が9枚の時、捨て札を拾って10枚にしてあがり判定
         const tempHand = [...hand, card];
-        return tempHand.length === 11 && logic.canGomen(tempHand);
+        return tempHand.length === 10 && logic.canGomen(tempHand);
     },
 
     // ========================================
@@ -341,6 +362,15 @@ const game = {
         cpu.hand.push(this.deck.pop());
         this.renderCpuHands();
         
+        // 捨てるカードを選ぶ
+        const discardIdx = this.chooseCpuDiscard(cpu.hand);
+        const card = cpu.hand.splice(discardIdx, 1)[0];
+        this.lastDiscard = card;
+        this.discardPile.push(card);
+        this.updateDiscardDisplay();
+        this.renderCpuHands();
+        
+        // 捨てた後のあがり判定（10枚）
         if (logic.canGomen(cpu.hand)) {
             const points = logic.calculateYakuPoints(cpu.hand);
             this.showMessage(`${this.getPlayerName(cpuId)}: 御免！（${points}点）`);
@@ -349,13 +379,6 @@ const game = {
             this.endRound(cpuId);
             return;
         }
-        
-        const discardIdx = this.chooseCpuDiscard(cpu.hand);
-        const card = cpu.hand.splice(discardIdx, 1)[0];
-        this.lastDiscard = card;
-        this.discardPile.push(card);
-        this.updateDiscardDisplay();
-        this.renderCpuHands();
         
         await this.checkOthersInterrupt(card, cpuId);
         
@@ -582,6 +605,9 @@ const game = {
 document.getElementById('deck').onclick = () => {
     if (game.phase === 'waiting' || game.roundOver) {
         game.startNewRound();
+    } else if (game.phase === 'gomen_check') {
+        // 御免をスキップ
+        game.skipGomen();
     } else if (game.phase === 'choudai') {
         game.phase = 'draw';
         game.draw();
