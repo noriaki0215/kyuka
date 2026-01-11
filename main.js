@@ -363,7 +363,16 @@ const game = {
             if (card.type === CARD_TYPE.TANZAKU) el.classList.add('tanzaku');
             if (card.type === CARD_TYPE.SPECIAL) el.classList.add('special');
             
-            el.innerHTML = `<span class="card-month">${card.month}</span><span class="card-name">${card.name.replace(card.month + 'に', '').replace(card.month + 'の', '')}</span>`;
+            // 画像があれば画像を表示、なければテキスト
+            if (card.image) {
+                el.innerHTML = `<img src="${card.image}" alt="${card.name}" class="card-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="card-fallback" style="display:none;">
+                        <span class="card-month">${card.month}</span>
+                        <span class="card-name">${card.name.replace(card.month + 'に', '').replace(card.month + 'の', '')}</span>
+                    </div>`;
+            } else {
+                el.innerHTML = `<span class="card-month">${card.month}</span><span class="card-name">${card.name}</span>`;
+            }
             el.onclick = () => this.discard(i);
             container.appendChild(el);
         });
@@ -374,9 +383,13 @@ const game = {
     updateDiscardDisplay() {
         const discardEl = document.getElementById('last-discard');
         if (this.lastDiscard) {
-            discardEl.innerText = this.lastDiscard.month;
+            if (this.lastDiscard.image) {
+                discardEl.innerHTML = `<img src="${this.lastDiscard.image}" alt="${this.lastDiscard.name}" class="discard-img">`;
+            } else {
+                discardEl.innerHTML = `<span>${this.lastDiscard.month}</span>`;
+            }
         } else {
-            discardEl.innerText = '?';
+            discardEl.innerHTML = '<span class="empty-discard">?</span>';
         }
     },
 
