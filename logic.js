@@ -158,10 +158,65 @@ const logic = {
         return hasMaku && hasSakazuki;
     },
 
+    // ========================================
+    // 光札の役
+    // ========================================
+    
+    // 光札を数える
+    countHikari(hand) {
+        return hand.filter(c => c.type === CARD_TYPE.HIKARI).length;
+    },
+
+    // 五光（光札5枚）
+    checkGokou(hand) {
+        return this.countHikari(hand) >= 5;
+    },
+
+    // 四光（光札4枚）
+    checkShikou(hand) {
+        const count = this.countHikari(hand);
+        return count === 4;
+    },
+
+    // ========================================
+    // 短冊の役
+    // ========================================
+    
+    // 短冊を数える
+    countTanzaku(hand) {
+        return hand.filter(c => c.type === CARD_TYPE.TANZAKU).length;
+    },
+
+    // タン（短冊5枚以上）
+    checkTan(hand) {
+        return this.countTanzaku(hand) >= 5;
+    },
+
+    // ========================================
+    // カスの役
+    // ========================================
+    
+    // カスを数える
+    countKasu(hand) {
+        return hand.filter(c => c.type === CARD_TYPE.KASU).length;
+    },
+
+    // カス（カス10枚以上）- 手牌11枚なのでカス役は難しい、7枚以上にする
+    checkKasu(hand) {
+        return this.countKasu(hand) >= 7;
+    },
+
     // 全ての役をチェックして結果を返す
     checkAllYaku(hand) {
         const yakuList = [];
         
+        // 光札の役（五光 > 四光）
+        if (this.checkGokou(hand)) {
+            yakuList.push({ name: "五光", points: 50, rank: 5 });
+        } else if (this.checkShikou(hand)) {
+            yakuList.push({ name: "四光", points: 30, rank: 4 });
+        }
+
         if (this.checkInoshikaCho(hand)) {
             yakuList.push({ name: "猪鹿蝶", points: 20, rank: 3 });
         }
@@ -176,6 +231,20 @@ const logic = {
         }
         if (this.checkHanamizake(hand)) {
             yakuList.push({ name: "花見酒", points: 5, rank: 2 });
+        }
+        
+        // 短冊の役
+        if (this.checkTan(hand)) {
+            const count = this.countTanzaku(hand);
+            const points = 5 + (count - 5) * 2;  // 5枚で5点、以降+2点
+            yakuList.push({ name: `タン(${count}枚)`, points: points, rank: 2 });
+        }
+
+        // カスの役
+        if (this.checkKasu(hand)) {
+            const count = this.countKasu(hand);
+            const points = 5 + (count - 7) * 2;  // 7枚で5点、以降+2点
+            yakuList.push({ name: `カス(${count}枚)`, points: points, rank: 1 });
         }
         
         const sanshu = this.checkSanshu(hand);
@@ -198,6 +267,15 @@ const logic = {
     // 役に使われているカードを取得（ハイライト用）
     getYakuCardIds(hand) {
         const yakuCards = new Set();
+
+        // 五光・四光
+        if (this.checkGokou(hand) || this.checkShikou(hand)) {
+            hand.forEach(c => {
+                if (c.type === CARD_TYPE.HIKARI) {
+                    yakuCards.add(c.id);
+                }
+            });
+        }
 
         // 猪鹿蝶
         if (this.checkInoshikaCho(hand)) {
@@ -241,6 +319,24 @@ const logic = {
         if (this.checkHanamizake(hand)) {
             hand.forEach(c => {
                 if (this.matchesCondition(c, YAKU_CARDS.MAKU) || c.isSakazuki) {
+                    yakuCards.add(c.id);
+                }
+            });
+        }
+
+        // タン
+        if (this.checkTan(hand)) {
+            hand.forEach(c => {
+                if (c.type === CARD_TYPE.TANZAKU) {
+                    yakuCards.add(c.id);
+                }
+            });
+        }
+
+        // カス
+        if (this.checkKasu(hand)) {
+            hand.forEach(c => {
+                if (c.type === CARD_TYPE.KASU) {
                     yakuCards.add(c.id);
                 }
             });
