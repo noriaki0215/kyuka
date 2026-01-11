@@ -8,12 +8,21 @@
 </head>
 <body>
     <div id="game-screen">
-        <div id="cpu-info">相手のチップ: <span id="cpu-chips">500</span></div>
+        <!-- 相手情報 -->
+        <div id="cpu-info">
+            <span class="chip-icon">🎰</span>
+            相手のチップ: <span id="cpu-chips">500</span>
+        </div>
         
+        <!-- 場 -->
         <div id="field">
             <div class="deck-slot">
-                <div id="deck" onclick="game.draw()">山札</div>
+                <div id="deck">山札</div>
                 <div id="deck-count">0</div>
+            </div>
+            <div id="pot-display">
+                <div id="pot-amount">0</div>
+                <p>ポット</p>
             </div>
             <div id="discard-area">
                 <div id="last-discard">?</div>
@@ -21,13 +30,31 @@
             </div>
         </div>
 
-        <div id="player-info">自分のチップ: <span id="player-chips">500</span></div>
+        <!-- 役表示 -->
+        <div id="yaku-display"></div>
+
+        <!-- アクションボタン -->
+        <div id="action-buttons">
+            <button id="btn-choudai" onclick="game.choudai()">頂戴</button>
+            <button id="btn-gomen" onclick="game.gomen()">御免</button>
+            <button id="btn-raise" onclick="game.raise(10)">積む(10)</button>
+            <button id="btn-fold" onclick="game.fold()">降りる</button>
+        </div>
+
+        <!-- プレイヤー情報 -->
+        <div id="player-info">
+            <span class="chip-icon">🎰</span>
+            自分のチップ: <span id="player-chips">500</span>
+        </div>
+        
+        <!-- 手札 -->
         <div id="hand-container"></div>
         
+        <!-- メッセージログ -->
         <div id="msg-log">山札をタップして開始</div>
     </div>
 
-    <script src="cards.js"></script>
+    <script src="card.js"></script>
     <script src="logic.js"></script>
     <script src="main.js"></script>
 </body>
