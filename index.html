@@ -32,6 +32,7 @@
                 <span class="chip-display">💰<span id="cpu1-chips">500</span></span>
             </div>
             <div class="opponent-hand" id="cpu1-hand"></div>
+            <div class="player-river" id="cpu1-river"></div>
         </div>
 
         <!-- 中央エリア -->
@@ -43,28 +44,20 @@
                     <span class="chip-display">💰<span id="cpu2-chips">500</span></span>
                 </div>
                 <div class="opponent-hand vertical" id="cpu2-hand"></div>
+                <div class="player-river vertical" id="cpu2-river"></div>
             </div>
 
             <!-- 場（中央） -->
             <div id="field">
-                <!-- 上段：山札とポット -->
-                <div id="field-top">
-                    <div class="deck-slot">
-                        <div id="deck">
-                            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Hanafuda_back.svg" alt="山札" class="deck-img">
-                        </div>
-                        <div id="deck-count">0</div>
+                <div class="deck-slot">
+                    <div id="deck">
+                        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Hanafuda_back.svg" alt="山札" class="deck-img">
                     </div>
-                    <div id="pot-display">
-                        <div id="pot-amount">0</div>
-                        <p>ポット</p>
-                    </div>
+                    <div id="deck-count">0</div>
                 </div>
-                
-                <!-- 捨て札エリア（河） -->
-                <div id="discard-river">
-                    <p class="river-label">捨て札</p>
-                    <div id="river-cards"></div>
+                <div id="pot-display">
+                    <div id="pot-amount">0</div>
+                    <p>ポット</p>
                 </div>
             </div>
 
@@ -75,6 +68,7 @@
                     <span class="chip-display">💰<span id="cpu3-chips">500</span></span>
                 </div>
                 <div class="opponent-hand vertical" id="cpu3-hand"></div>
+                <div class="player-river vertical" id="cpu3-river"></div>
             </div>
         </div>
 
@@ -91,6 +85,9 @@
             <button id="btn-raise" onclick="game.raise(10)">積む(10)</button>
             <button id="btn-fold" onclick="game.fold()">降りる</button>
         </div>
+
+        <!-- 自分の河 -->
+        <div class="player-river" id="player-river"></div>
 
         <!-- プレイヤー情報 -->
         <div id="player-info">

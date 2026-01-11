@@ -8,10 +8,10 @@ const game = {
     
     // プレイヤー情報
     players: {
-        player: { hand: [], chips: 500, folded: false },
-        cpu1: { hand: [], chips: 500, folded: false },
-        cpu2: { hand: [], chips: 500, folded: false },
-        cpu3: { hand: [], chips: 500, folded: false }
+        player: { hand: [], chips: 500, folded: false, river: [] },
+        cpu1: { hand: [], chips: 500, folded: false, river: [] },
+        cpu2: { hand: [], chips: 500, folded: false, river: [] },
+        cpu3: { hand: [], chips: 500, folded: false, river: [] }
     },
     
     turnOrder: [],
@@ -74,10 +74,11 @@ const game = {
         // デッキをシャッフル
         this.deck = [...CARD_DATA].sort(() => Math.random() - 0.5);
         
-        // 各プレイヤーに10枚配布
+        // 各プレイヤーに10枚配布、河をリセット
         this.turnOrder.forEach(playerId => {
             this.players[playerId].hand = this.deck.splice(0, 10);
             this.players[playerId].folded = false;
+            this.players[playerId].river = [];
         });
         
         // 使用しないプレイヤーの手札をクリア
@@ -87,6 +88,7 @@ const game = {
         
         this.discardPile = [];
         this.lastDiscard = null;
+        this.lastDiscardOwner = null;
         this.currentTurnIndex = 0;
         this.phase = 'draw';
         this.pot = 0;
@@ -205,8 +207,10 @@ const game = {
         
         const card = this.players.player.hand.splice(index, 1)[0];
         this.lastDiscard = card;
+        this.lastDiscardOwner = 'player';
         this.discardPile.push(card);
-        this.updateDiscardDisplay();
+        this.players.player.river.push(card);
+        this.updateAllRivers();
         this.render();
         this.showYaku();
         
@@ -244,7 +248,12 @@ const game = {
         
         this.players.player.hand.push(this.lastDiscard);
         this.discardPile.pop();
+        // 捨てたプレイヤーの河からも削除
+        if (this.lastDiscardOwner) {
+            this.players[this.lastDiscardOwner].river.pop();
+        }
         this.lastDiscard = this.discardPile[this.discardPile.length - 1] || null;
+        this.updateAllRivers();
         
         this.showMessage("頂戴！三種が完成しました");
         this.phase = 'discard';
@@ -319,6 +328,8 @@ const game = {
                 } else {
                     this.players[playerId].hand.push(discardedCard);
                     this.discardPile.pop();
+                    this.players[discarderId].river.pop();
+                    this.updateAllRivers();
                     const points = logic.calculateYakuPoints(this.players[playerId].hand);
                     this.showMessage(`${this.getPlayerName(playerId)}: 御免！（${points}点）`);
                     this.pot += points * 5;
@@ -336,10 +347,11 @@ const game = {
                 } else if (Math.random() > 0.4) {
                     this.players[playerId].hand.push(discardedCard);
                     this.discardPile.pop();
+                    this.players[discarderId].river.pop();
                     this.lastDiscard = this.discardPile[this.discardPile.length - 1] || null;
                     this.showMessage(`${this.getPlayerName(playerId)}: 頂戴！`);
                     await new Promise(r => setTimeout(r, 800));
-                    this.updateDiscardDisplay();
+                    this.updateAllRivers();
                 }
             }
         }
@@ -366,8 +378,10 @@ const game = {
         const discardIdx = this.chooseCpuDiscard(cpu.hand);
         const card = cpu.hand.splice(discardIdx, 1)[0];
         this.lastDiscard = card;
+        this.lastDiscardOwner = cpuId;
         this.discardPile.push(card);
-        this.updateDiscardDisplay();
+        cpu.river.push(card);
+        this.updateAllRivers();
         this.renderCpuHands();
         
         // 捨てた後のあがり判定（10枚）
@@ -519,30 +533,33 @@ const game = {
         }
     },
 
-    updateDiscardDisplay() {
-        const riverEl = document.getElementById('river-cards');
-        riverEl.innerHTML = '';
-        
-        this.discardPile.forEach((card, index) => {
-            const cardEl = document.createElement('div');
-            cardEl.className = 'river-card';
+    updateAllRivers() {
+        // 各プレイヤーの河を更新
+        this.turnOrder.forEach(playerId => {
+            const riverEl = document.getElementById(`${playerId}-river`);
+            if (!riverEl) return;
             
-            // 最後に捨てられた札をハイライト
-            if (index === this.discardPile.length - 1) {
-                cardEl.classList.add('latest');
-            }
+            const river = this.players[playerId].river;
+            riverEl.innerHTML = '';
             
-            if (card.image) {
-                cardEl.innerHTML = `<img src="${card.image}" alt="${card.name}">`;
-            } else {
-                cardEl.innerHTML = `<span style="font-size:10px;">${card.month}</span>`;
-            }
-            
-            riverEl.appendChild(cardEl);
+            river.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'river-card';
+                
+                // 最後に捨てられた札をハイライト
+                if (this.lastDiscardOwner === playerId && index === river.length - 1) {
+                    cardEl.classList.add('latest');
+                }
+                
+                if (card.image) {
+                    cardEl.innerHTML = `<img src="${card.image}" alt="${card.name}">`;
+                } else {
+                    cardEl.innerHTML = `<span style="font-size:8px;">${card.month}</span>`;
+                }
+                
+                riverEl.appendChild(cardEl);
+            });
         });
-        
-        // 自動スクロールで最新の札を表示
-        riverEl.scrollTop = riverEl.scrollHeight;
     },
 
     updateAllChipsDisplay() {

@@ -218,22 +218,13 @@ body {
 #field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     align-items: center;
-    justify-content: flex-start;
-    padding: 8px;
+    justify-content: center;
+    padding: 10px;
     background: rgba(0, 0, 0, 0.25);
     border-radius: 10px;
     flex: 1;
-    min-height: 0;
-    max-width: 280px;
-}
-
-#field-top {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    justify-content: center;
 }
 
 .deck-slot {
@@ -261,40 +252,35 @@ body {
     background: rgba(212, 175, 55, 0.2);
 }
 
-/* 捨て札エリア（河） */
-#discard-river {
-    flex: 1;
-    width: 100%;
-    min-height: 60px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    padding: 4px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.river-label {
-    font-size: 9px;
-    color: #888;
-    margin: 0 0 2px 2px;
-    flex-shrink: 0;
-}
-
-#river-cards {
+/* 各プレイヤーの河（捨て札） */
+.player-river {
     display: flex;
     flex-wrap: wrap;
     gap: 2px;
+    justify-content: center;
+    min-height: 24px;
+    max-height: 50px;
+    overflow: hidden;
+    padding: 2px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    margin-top: 2px;
+}
+
+.player-river.vertical {
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-height: none;
+    max-width: 50px;
+    min-width: 30px;
     justify-content: flex-start;
-    align-content: flex-start;
-    overflow-y: auto;
-    flex: 1;
+    margin-top: 4px;
 }
 
 .river-card {
-    width: 28px;
-    height: 42px;
-    border-radius: 3px;
+    width: 22px;
+    height: 33px;
+    border-radius: 2px;
     border: 1px solid #8b7355;
     overflow: hidden;
     background: #fffef0;
@@ -309,7 +295,13 @@ body {
 
 .river-card.latest {
     border: 2px solid #4fc3f7;
-    box-shadow: 0 0 6px #4fc3f7;
+    box-shadow: 0 0 4px #4fc3f7;
+}
+
+/* 自分の河 */
+#player-river {
+    max-width: 350px;
+    width: 100%;
 }
 
 #deck {
