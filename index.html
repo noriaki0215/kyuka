@@ -11,14 +11,11 @@
     <div id="mode-select-screen">
         <h1>🎴 九華</h1>
         <p class="subtitle">Kyuka Online</p>
+        <p class="rule-summary">3人専用 | 花札2セット(96枚) | 3メンツ+対であがり</p>
         <div id="mode-buttons">
-            <button class="mode-btn" onclick="game.startWithPlayers(3)">
+            <button class="mode-btn" onclick="game.startGame()">
                 <span class="mode-icon">👤👤👤</span>
-                <span class="mode-text">3人対戦</span>
-            </button>
-            <button class="mode-btn" onclick="game.startWithPlayers(4)">
-                <span class="mode-icon">👤👤👤👤</span>
-                <span class="mode-text">4人対戦</span>
+                <span class="mode-text">ゲーム開始</span>
             </button>
         </div>
     </div>
@@ -61,15 +58,6 @@
                 </div>
             </div>
 
-            <!-- 右（CPU3）- 4人戦のみ表示 -->
-            <div id="opponent-right" class="opponent-area opponent-side">
-                <div class="opponent-info vertical">
-                    <span class="player-name">CPU3</span>
-                    <span class="chip-display">💰<span id="cpu3-chips">500</span></span>
-                </div>
-                <div class="opponent-hand vertical" id="cpu3-hand"></div>
-                <div class="player-river vertical" id="cpu3-river"></div>
-            </div>
         </div>
 
         <!-- 現在のターン表示 -->

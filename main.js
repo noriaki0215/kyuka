@@ -3,15 +3,14 @@ const game = {
     discardPile: [],
     lastDiscard: null,
     
-    // プレイヤー数（3または4）
-    playerCount: 4,
+    // 3人専用
+    playerCount: 3,
     
     // プレイヤー情報
     players: {
         player: { hand: [], chips: 500, folded: false, river: [] },
         cpu1: { hand: [], chips: 500, folded: false, river: [] },
-        cpu2: { hand: [], chips: 500, folded: false, river: [] },
-        cpu3: { hand: [], chips: 500, folded: false, river: [] }
+        cpu2: { hand: [], chips: 500, folded: false, river: [] }
     },
     
     turnOrder: [],
@@ -33,21 +32,12 @@ const game = {
     },
 
     // ========================================
-    // モード選択
+    // ゲーム開始
     // ========================================
 
-    startWithPlayers(count) {
-        this.playerCount = count;
-        
-        // ターン順序を設定
-        if (count === 3) {
-            this.turnOrder = ['player', 'cpu1', 'cpu2'];
-            // CPU3を非表示
-            document.getElementById('opponent-right').style.display = 'none';
-        } else {
-            this.turnOrder = ['player', 'cpu1', 'cpu2', 'cpu3'];
-            document.getElementById('opponent-right').style.display = 'flex';
-        }
+    startGame() {
+        // 3人固定
+        this.turnOrder = ['player', 'cpu1', 'cpu2'];
         
         // 画面切り替え
         document.getElementById('mode-select-screen').style.display = 'none';
@@ -194,11 +184,19 @@ const game = {
         }
         
         this.players.player.hand.push(this.deck.pop());
-        this.phase = 'discard';
         this.highlightDeck(false);
         this.render();
-        this.showMessage("👆 手札から1枚選んでタップして捨ててください", true);
         this.showYaku();
+        
+        // 11枚であがり判定
+        if (logic.canGomen(this.players.player.hand)) {
+            this.phase = 'gomen_check';
+            this.showMessage("🎉【御免可能】御免ボタンであがれます！", true);
+            return;
+        }
+        
+        this.phase = 'discard';
+        this.showMessage("👆 手札から1枚選んでタップして捨ててください", true);
     },
 
     async discard(index) {
@@ -214,14 +212,7 @@ const game = {
         this.render();
         this.showYaku();
         
-        // 捨てた後、自分があがれるかチェック（10枚）
-        if (logic.canGomen(this.players.player.hand)) {
-            this.phase = 'gomen_check';
-            this.showMessage("🎉【御免可能】御免ボタンであがれます！スキップは山札タップ", true);
-            return;
-        }
-        
-        // 他のCPUが頂戴/御免できるかチェック
+        // 他のプレイヤーが頂戴/御免できるかチェック
         await this.checkOthersInterrupt(card, 'player');
         
         if (this.roundOver) return;
@@ -269,13 +260,13 @@ const game = {
         if (this.currentPlayer !== 'player') return;
         
         const hand = this.players.player.hand;
-        if (hand.length !== 10) {
-            this.showMessage("手札が10枚の時のみ御免できます");
+        if (hand.length !== 11) {
+            this.showMessage("手札が11枚の時のみ御免できます");
             return;
         }
         
         if (!logic.canGomen(hand)) {
-            this.showMessage("あがりの形になっていません（3メンツ+頭1枚）");
+            this.showMessage("あがりの形になっていません（3メンツ+対）");
             return;
         }
         
@@ -302,11 +293,11 @@ const game = {
         this.nextTurn();
     },
 
-    // 捨て札を拾って10枚にした時にあがれるか
+    // 捨て札を拾って11枚にした時にあがれるか
     canGomenWithDiscard(hand, card) {
-        // 手札が9枚の時、捨て札を拾って10枚にしてあがり判定
+        // 手札が10枚の時、捨て札を拾って11枚にしてあがり判定
         const tempHand = [...hand, card];
-        return tempHand.length === 10 && logic.canGomen(tempHand);
+        return tempHand.length === 11 && logic.canGomen(tempHand);
     },
 
     // ========================================
@@ -374,6 +365,16 @@ const game = {
         cpu.hand.push(this.deck.pop());
         this.renderCpuHands();
         
+        // 引いた後のあがり判定（11枚）
+        if (logic.canGomen(cpu.hand)) {
+            const points = logic.calculateYakuPoints(cpu.hand);
+            this.showMessage(`${this.getPlayerName(cpuId)}: 御免！（${points}点）`);
+            this.pot += points * 5;
+            this.collectPot(cpuId);
+            this.endRound(cpuId);
+            return;
+        }
+        
         // 捨てるカードを選ぶ
         const discardIdx = this.chooseCpuDiscard(cpu.hand);
         const card = cpu.hand.splice(discardIdx, 1)[0];
@@ -383,16 +384,6 @@ const game = {
         cpu.river.push(card);
         this.updateAllRivers();
         this.renderCpuHands();
-        
-        // 捨てた後のあがり判定（10枚）
-        if (logic.canGomen(cpu.hand)) {
-            const points = logic.calculateYakuPoints(cpu.hand);
-            this.showMessage(`${this.getPlayerName(cpuId)}: 御免！（${points}点）`);
-            this.pot += points * 5;
-            this.collectPot(cpuId);
-            this.endRound(cpuId);
-            return;
-        }
         
         await this.checkOthersInterrupt(card, cpuId);
         
@@ -418,8 +409,7 @@ const game = {
         const names = {
             player: 'あなた',
             cpu1: 'CPU1',
-            cpu2: 'CPU2',
-            cpu3: 'CPU3'
+            cpu2: 'CPU2'
         };
         return names[playerId];
     },
@@ -522,15 +512,6 @@ const game = {
         for (let i = 0; i < this.players.cpu2.hand.length; i++) {
             cpu2Container.innerHTML += `<div class="cpu-card"><img src="${cardBackUrl}" alt="裏"></div>`;
         }
-        
-        // CPU3（右）- 4人戦のみ
-        if (this.playerCount === 4) {
-            const cpu3Container = document.getElementById('cpu3-hand');
-            cpu3Container.innerHTML = '';
-            for (let i = 0; i < this.players.cpu3.hand.length; i++) {
-                cpu3Container.innerHTML += `<div class="cpu-card"><img src="${cardBackUrl}" alt="裏"></div>`;
-            }
-        }
     },
 
     updateAllRivers() {
@@ -566,9 +547,6 @@ const game = {
         document.getElementById('player-chips').innerText = this.players.player.chips;
         document.getElementById('cpu1-chips').innerText = this.players.cpu1.chips;
         document.getElementById('cpu2-chips').innerText = this.players.cpu2.chips;
-        if (this.playerCount === 4) {
-            document.getElementById('cpu3-chips').innerText = this.players.cpu3.chips;
-        }
         document.getElementById('pot-amount').innerText = this.pot;
     },
 
@@ -591,8 +569,6 @@ const game = {
                 document.getElementById('opponent-top').classList.add('active-player');
             } else if (this.currentPlayer === 'cpu2') {
                 document.getElementById('opponent-left').classList.add('active-player');
-            } else if (this.currentPlayer === 'cpu3') {
-                document.getElementById('opponent-right').classList.add('active-player');
             }
         }
     },

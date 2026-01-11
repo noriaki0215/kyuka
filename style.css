@@ -36,7 +36,16 @@ body {
 #mode-select-screen .subtitle {
     font-size: 18px;
     color: #aaa;
-    margin: 8px 0 40px 0;
+    margin: 8px 0 10px 0;
+}
+
+#mode-select-screen .rule-summary {
+    font-size: 12px;
+    color: #888;
+    margin: 0 0 30px 0;
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
 }
 
 #mode-buttons {
