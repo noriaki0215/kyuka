@@ -101,7 +101,8 @@ const game = {
         this.render();
         this.updateAllChipsDisplay();
         this.updateTurnIndicator();
-        this.showMessage("山札をタップしてカードを引いてください");
+        this.showMessage("👆 山札をタップしてカードを1枚引いてください", true);
+        this.highlightDeck(true);
         this.showYaku();
     },
 
@@ -170,8 +171,10 @@ const game = {
         this.updateTurnIndicator();
 
         if (this.currentPlayer === 'player') {
-            this.showMessage("あなたの番です。山札をタップしてください");
+            this.showMessage("👆 あなたの番！山札をタップしてください", true);
+            this.highlightDeck(true);
         } else {
+            this.highlightDeck(false);
             this.cpuTurn();
         }
     },
@@ -190,8 +193,9 @@ const game = {
         
         this.players.player.hand.push(this.deck.pop());
         this.phase = 'discard';
+        this.highlightDeck(false);
         this.render();
-        this.showMessage("札を捨ててください");
+        this.showMessage("👆 手札から1枚選んでタップして捨ててください", true);
         this.showYaku();
     },
 
@@ -289,7 +293,7 @@ const game = {
             if (this.canGomenWithDiscard(hand, discardedCard)) {
                 if (playerId === 'player') {
                     this.phase = 'choudai';
-                    this.showMessage("【御免可能】御免ボタンを押してください");
+                    this.showMessage("🎉【御免可能】御免ボタンであがれます！", true);
                     return;
                 } else {
                     this.players[playerId].hand.push(discardedCard);
@@ -307,7 +311,7 @@ const game = {
             if (this.canChoudai(hand, discardedCard)) {
                 if (playerId === 'player') {
                     this.phase = 'choudai';
-                    this.showMessage("【頂戴可能】頂戴ボタンを押すか、山札をタップしてスキップ");
+                    this.showMessage("✨【頂戴可能】頂戴で三種完成！またはスキップで山札タップ", true);
                 } else if (Math.random() > 0.4) {
                     this.players[playerId].hand.push(discardedCard);
                     this.discardPile.pop();
@@ -458,18 +462,20 @@ const game = {
     },
 
     renderCpuHands() {
+        const cardBackUrl = 'https://commons.wikimedia.org/wiki/Special:FilePath/Hanafuda_back.svg';
+        
         // CPU1（対面）
         const cpu1Container = document.getElementById('cpu1-hand');
         cpu1Container.innerHTML = '';
         for (let i = 0; i < this.players.cpu1.hand.length; i++) {
-            cpu1Container.innerHTML += '<div class="cpu-card"></div>';
+            cpu1Container.innerHTML += `<div class="cpu-card"><img src="${cardBackUrl}" alt="裏"></div>`;
         }
         
         // CPU2（左）
         const cpu2Container = document.getElementById('cpu2-hand');
         cpu2Container.innerHTML = '';
         for (let i = 0; i < this.players.cpu2.hand.length; i++) {
-            cpu2Container.innerHTML += '<div class="cpu-card"></div>';
+            cpu2Container.innerHTML += `<div class="cpu-card"><img src="${cardBackUrl}" alt="裏"></div>`;
         }
         
         // CPU3（右）- 4人戦のみ
@@ -477,7 +483,7 @@ const game = {
             const cpu3Container = document.getElementById('cpu3-hand');
             cpu3Container.innerHTML = '';
             for (let i = 0; i < this.players.cpu3.hand.length; i++) {
-                cpu3Container.innerHTML += '<div class="cpu-card"></div>';
+                cpu3Container.innerHTML += `<div class="cpu-card"><img src="${cardBackUrl}" alt="裏"></div>`;
             }
         }
     },
@@ -530,8 +536,25 @@ const game = {
         }
     },
 
-    showMessage(msg) {
-        document.getElementById('msg-log').innerText = msg;
+    showMessage(msg, highlight = false) {
+        const msgEl = document.getElementById('msg-log');
+        msgEl.innerText = msg;
+        
+        if (highlight) {
+            msgEl.classList.add('msg-highlight');
+        } else {
+            msgEl.classList.remove('msg-highlight');
+        }
+    },
+
+    // 山札のハイライト（アクション促進）
+    highlightDeck(show) {
+        const deckSlot = document.querySelector('.deck-slot');
+        if (show) {
+            deckSlot.classList.add('deck-highlight');
+        } else {
+            deckSlot.classList.remove('deck-highlight');
+        }
     },
 
     showYaku() {
