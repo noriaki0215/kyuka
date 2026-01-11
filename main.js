@@ -436,6 +436,9 @@ const game = {
         const container = document.getElementById('hand-container');
         container.innerHTML = '';
         
+        // 役に使われているカードIDを取得
+        const yakuCardIds = logic.getYakuCardIds(this.players.player.hand);
+        
         this.players.player.hand.forEach((card, i) => {
             const el = document.createElement('div');
             el.className = 'card';
@@ -443,6 +446,11 @@ const game = {
             if (card.type === CARD_TYPE.TANE) el.classList.add('tane');
             if (card.type === CARD_TYPE.TANZAKU) el.classList.add('tanzaku');
             if (card.type === CARD_TYPE.SPECIAL) el.classList.add('special');
+            
+            // 役に使われているカードをハイライト
+            if (yakuCardIds.has(card.id)) {
+                el.classList.add('yaku-highlight');
+            }
             
             if (card.image) {
                 el.innerHTML = `<img src="${card.image}" alt="${card.name}" class="card-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -561,7 +569,9 @@ const game = {
         const yakuList = logic.checkAllYaku(this.players.player.hand);
         const yakuEl = document.getElementById('yaku-display');
         if (yakuList.length > 0) {
-            yakuEl.innerText = "役: " + yakuList.map(y => y.name).join(", ");
+            const totalPoints = yakuList.reduce((sum, y) => sum + y.points, 0);
+            const yakuText = yakuList.map(y => `${y.name}(+${y.points})`).join(", ");
+            yakuEl.innerText = `★役: ${yakuText} = 合計+${totalPoints}点`;
         } else {
             yakuEl.innerText = "";
         }

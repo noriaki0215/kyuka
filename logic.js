@@ -118,5 +118,59 @@ const logic = {
     calculateYakuPoints(hand) {
         const yakuList = this.checkAllYaku(hand);
         return yakuList.reduce((sum, yaku) => sum + yaku.points, 0);
+    },
+
+    // 役に使われているカードIDを取得（ハイライト用）
+    getYakuCardIds(hand) {
+        const yakuCardIds = new Set();
+        const handIds = hand.map(c => c.id);
+
+        // 猪鹿蝶
+        if (this.checkInoshikaCho(hand)) {
+            [YAKU_CARDS.INOSHISHI, YAKU_CARDS.SHIKA, YAKU_CARDS.CHO].forEach(id => yakuCardIds.add(id));
+        }
+
+        // 赤短
+        if (this.checkAkatan(hand)) {
+            YAKU_CARDS.AKA_TAN.forEach(id => yakuCardIds.add(id));
+        }
+
+        // 青短
+        if (this.checkAotan(hand)) {
+            YAKU_CARDS.AO_TAN.forEach(id => yakuCardIds.add(id));
+        }
+
+        // 月見酒
+        if (this.checkTsukimizake(hand)) {
+            [YAKU_CARDS.TSUKI, YAKU_CARDS.SAKAZUKI].forEach(id => yakuCardIds.add(id));
+        }
+
+        // 花見酒
+        if (this.checkHanamizake(hand)) {
+            [YAKU_CARDS.MAKU, YAKU_CARDS.SAKAZUKI].forEach(id => yakuCardIds.add(id));
+        }
+
+        // 九華
+        if (this.checkKyuka(hand)) {
+            hand.forEach(card => {
+                if (card.monthNum >= 1 && card.monthNum <= 9) {
+                    yakuCardIds.add(card.id);
+                }
+            });
+        }
+
+        // 三種
+        const sanshu = this.checkSanshu(hand);
+        if (sanshu) {
+            sanshu.forEach(monthNum => {
+                hand.forEach(card => {
+                    if (card.monthNum === monthNum) {
+                        yakuCardIds.add(card.id);
+                    }
+                });
+            });
+        }
+
+        return yakuCardIds;
     }
 };

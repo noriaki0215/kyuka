@@ -527,6 +527,31 @@ body {
     color: white;
 }
 
+/* 役に使われているカードのハイライト */
+.card.yaku-highlight {
+    animation: yaku-glow 1.5s ease-in-out infinite;
+    position: relative;
+}
+
+.card.yaku-highlight::after {
+    content: '★';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    font-size: 12px;
+    color: #ffd700;
+    text-shadow: 0 0 4px #ff6b00;
+}
+
+@keyframes yaku-glow {
+    0%, 100% { 
+        box-shadow: 0 0 5px #ff6b00, 0 0 10px #ffd700;
+    }
+    50% { 
+        box-shadow: 0 0 10px #ff6b00, 0 0 20px #ffd700, 0 0 30px #ff6b00;
+    }
+}
+
 /* ========================================
    メッセージログ
    ======================================== */
