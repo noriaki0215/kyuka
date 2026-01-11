@@ -1,23 +1,300 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
-    margin: 0; background: #0e2a1a; color: #e0c38c;
-    font-family: serif; overflow: hidden; touch-action: none;
+    margin: 0;
+    background: linear-gradient(135deg, #0e2a1a 0%, #1a3d2e 100%);
+    color: #e0c38c;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+    overflow: hidden;
+    touch-action: none;
+    min-height: 100vh;
 }
+
 #game-screen {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: space-around; height: 100vh; padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100vh;
+    padding: 10px;
+    max-width: 500px;
+    margin: 0 auto;
 }
-.deck-slot, #discard-area {
-    width: 60px; height: 90px; border: 2px solid #d4af37;
-    border-radius: 5px; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
+
+/* プレイヤー情報 */
+#cpu-info, #player-info {
+    font-size: 16px;
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
-#deck { background: #800; width: 100%; height: 100%; cursor: pointer; }
+
+.chip-icon {
+    font-size: 20px;
+}
+
+#player-chips, #cpu-chips {
+    font-weight: bold;
+    color: #ffd700;
+    font-size: 18px;
+}
+
+/* 場エリア */
+#field {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.deck-slot, #discard-area, #pot-display {
+    width: 70px;
+    height: 100px;
+    border: 2px solid #d4af37;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+#deck {
+    background: linear-gradient(135deg, #8b0000 0%, #5c0000 100%);
+    width: 100%;
+    height: 70%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: transform 0.1s;
+}
+
+#deck:hover {
+    transform: scale(1.05);
+}
+
+#deck:active {
+    transform: scale(0.95);
+}
+
+#deck-count {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #aaa;
+}
+
+#last-discard {
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+}
+
+#pot-display {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: #ffd700;
+}
+
+#pot-amount {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffd700;
+}
+
+#pot-display p, #discard-area p {
+    margin: 4px 0 0 0;
+    font-size: 11px;
+    color: #aaa;
+}
+
+/* 役表示 */
+#yaku-display {
+    min-height: 24px;
+    font-size: 14px;
+    color: #ff6b6b;
+    font-weight: bold;
+    text-align: center;
+    padding: 4px;
+}
+
+/* アクションボタン */
+#action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#action-buttons button {
+    padding: 10px 16px;
+    font-size: 14px;
+    font-family: inherit;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: bold;
+}
+
+#btn-choudai {
+    background: linear-gradient(135deg, #4a90d9 0%, #357abd 100%);
+    color: white;
+}
+
+#btn-gomen {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+}
+
+#btn-raise {
+    background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+    color: white;
+}
+
+#btn-fold {
+    background: linear-gradient(135deg, #7f8c8d 0%, #5d6d7e 100%);
+    color: white;
+}
+
+#action-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+#action-buttons button:active {
+    transform: translateY(0);
+}
+
+/* 手札コンテナ */
 #hand-container {
-    display: flex; flex-wrap: wrap; justify-content: center; gap: 4px;
-    width: 100%; max-width: 400px; min-height: 100px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 450px;
+    min-height: 110px;
+    padding: 8px;
 }
+
+/* カード */
 .card {
-    width: 55px; height: 85px; background: white; color: black;
-    border-radius: 3px; display: flex; align-items: center;
-    justify-content: center; font-weight: bold; border: 1px solid #333;
+    width: 58px;
+    height: 88px;
+    background: linear-gradient(135deg, #fffef0 0%, #f5f0dc 100%);
+    color: #333;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border: 2px solid #8b7355;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 2px 10px 15px rgba(0, 0, 0, 0.4);
+}
+
+.card:active {
+    transform: translateY(-4px);
+}
+
+.card-month {
+    font-size: 16px;
+    color: #2c3e50;
+}
+
+.card-name {
+    font-size: 10px;
+    color: #666;
+    margin-top: 4px;
+    text-align: center;
+}
+
+/* カード種類別スタイル */
+.card.hikari {
+    background: linear-gradient(135deg, #fff9c4 0%, #ffeb3b 100%);
+    border-color: #ffc107;
+}
+
+.card.hikari .card-month {
+    color: #ff6f00;
+}
+
+.card.tane {
+    background: linear-gradient(135deg, #e8f5e9 0%, #a5d6a7 100%);
+    border-color: #4caf50;
+}
+
+.card.tane .card-month {
+    color: #2e7d32;
+}
+
+.card.tanzaku {
+    background: linear-gradient(135deg, #fce4ec 0%, #f48fb1 100%);
+    border-color: #e91e63;
+}
+
+.card.tanzaku .card-month {
+    color: #c2185b;
+}
+
+.card.special {
+    background: linear-gradient(135deg, #e1bee7 0%, #9c27b0 100%);
+    border-color: #7b1fa2;
+    color: white;
+}
+
+.card.special .card-month,
+.card.special .card-name {
+    color: white;
+}
+
+/* メッセージログ */
+#msg-log {
+    font-size: 14px;
+    text-align: center;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 380px) {
+    .card {
+        width: 50px;
+        height: 75px;
+    }
+    
+    .card-month {
+        font-size: 14px;
+    }
+    
+    .card-name {
+        font-size: 9px;
+    }
+    
+    #action-buttons button {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
 }
