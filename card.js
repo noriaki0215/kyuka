@@ -20,8 +20,9 @@ const TANZAKU_TYPE = {
 // Wikimedia Commons 画像URL（Special:FilePathを使用してリダイレクト）
 const IMG = (name) => `https://commons.wikimedia.org/wiki/Special:FilePath/${name}`;
 
-// 全48枚 + 特殊札2枚 = 50枚のカードデータ
-const CARD_DATA = [
+// 花札2セット（96枚）を生成する関数
+function generateCardData() {
+    const cards = [];
     // 1月 - 松
     { id: 0, month: "松", monthNum: 1, type: CARD_TYPE.HIKARI, name: "松に鶴", 
       image: IMG("Hanafuda_January_Hikari.svg") },
