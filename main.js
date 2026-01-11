@@ -3,7 +3,10 @@ const game = {
     discardPile: [],
     lastDiscard: null,
     
-    // 4人のプレイヤー: player, cpu1, cpu2, cpu3
+    // プレイヤー数（3または4）
+    playerCount: 4,
+    
+    // プレイヤー情報
     players: {
         player: { hand: [], chips: 500, folded: false },
         cpu1: { hand: [], chips: 500, folded: false },
@@ -11,7 +14,7 @@ const game = {
         cpu3: { hand: [], chips: 500, folded: false }
     },
     
-    turnOrder: ['player', 'cpu1', 'cpu2', 'cpu3'],
+    turnOrder: [],
     currentTurnIndex: 0,
     phase: 'waiting', // waiting, draw, discard, choudai
     
@@ -29,6 +32,44 @@ const game = {
         return this.players[this.currentPlayer].hand;
     },
 
+    // ========================================
+    // モード選択
+    // ========================================
+
+    startWithPlayers(count) {
+        this.playerCount = count;
+        
+        // ターン順序を設定
+        if (count === 3) {
+            this.turnOrder = ['player', 'cpu1', 'cpu2'];
+            // CPU3を非表示
+            document.getElementById('opponent-right').style.display = 'none';
+        } else {
+            this.turnOrder = ['player', 'cpu1', 'cpu2', 'cpu3'];
+            document.getElementById('opponent-right').style.display = 'flex';
+        }
+        
+        // 画面切り替え
+        document.getElementById('mode-select-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'flex';
+        
+        // チップをリセット
+        Object.keys(this.players).forEach(p => {
+            this.players[p].chips = 500;
+        });
+        
+        this.gameOver = false;
+        this.init();
+    },
+
+    showModeSelect() {
+        document.getElementById('game-screen').style.display = 'none';
+        document.getElementById('mode-select-screen').style.display = 'flex';
+        this.phase = 'waiting';
+        this.roundOver = false;
+        this.gameOver = false;
+    },
+
     init() {
         // デッキをシャッフル
         this.deck = [...CARD_DATA].sort(() => Math.random() - 0.5);
@@ -39,6 +80,11 @@ const game = {
             this.players[playerId].folded = false;
         });
         
+        // 使用しないプレイヤーの手札をクリア
+        if (this.playerCount === 3) {
+            this.players.cpu3.hand = [];
+        }
+        
         this.discardPile = [];
         this.lastDiscard = null;
         this.currentTurnIndex = 0;
@@ -47,7 +93,7 @@ const game = {
         this.currentBet = 10;
         this.roundOver = false;
         
-        // 初期ベット（全員10チップ）
+        // 初期ベット
         this.turnOrder.forEach(playerId => {
             this.placeBet(10, playerId);
         });
@@ -84,8 +130,8 @@ const game = {
         this.showMessage(`${amount}チップ積みました！`);
         
         // 他のCPUも50%の確率でコール
-        ['cpu1', 'cpu2', 'cpu3'].forEach(cpuId => {
-            if (!this.players[cpuId].folded && Math.random() > 0.5 && this.players[cpuId].chips >= amount) {
+        this.turnOrder.forEach(cpuId => {
+            if (cpuId !== 'player' && !this.players[cpuId].folded && Math.random() > 0.5 && this.players[cpuId].chips >= amount) {
                 this.placeBet(amount, cpuId);
             }
         });
@@ -112,9 +158,9 @@ const game = {
         // 次のプレイヤーを探す（降りていないプレイヤー）
         let attempts = 0;
         do {
-            this.currentTurnIndex = (this.currentTurnIndex + 1) % 4;
+            this.currentTurnIndex = (this.currentTurnIndex + 1) % this.turnOrder.length;
             attempts++;
-            if (attempts > 4) {
+            if (attempts > this.turnOrder.length) {
                 this.endRound('draw');
                 return;
             }
@@ -234,7 +280,6 @@ const game = {
     // ========================================
 
     async checkOthersInterrupt(discardedCard, discarderId) {
-        // 他のプレイヤーが頂戴/御免できるかチェック
         for (const playerId of this.turnOrder) {
             if (playerId === discarderId || this.players[playerId].folded) continue;
             
@@ -247,7 +292,6 @@ const game = {
                     this.showMessage("【御免可能】御免ボタンを押してください");
                     return;
                 } else {
-                    // CPUが御免
                     this.players[playerId].hand.push(discardedCard);
                     this.discardPile.pop();
                     const points = logic.calculateYakuPoints(this.players[playerId].hand);
@@ -265,7 +309,6 @@ const game = {
                     this.phase = 'choudai';
                     this.showMessage("【頂戴可能】頂戴ボタンを押すか、山札をタップしてスキップ");
                 } else if (Math.random() > 0.4) {
-                    // CPUが頂戴（60%の確率）
                     this.players[playerId].hand.push(discardedCard);
                     this.discardPile.pop();
                     this.lastDiscard = this.discardPile[this.discardPile.length - 1] || null;
@@ -286,7 +329,6 @@ const game = {
         this.showMessage(`${this.getPlayerName(cpuId)}が考えています...`);
         await new Promise(r => setTimeout(r, 800));
         
-        // カードを引く
         if (this.deck.length === 0) {
             this.endRound('draw');
             return;
@@ -295,7 +337,6 @@ const game = {
         cpu.hand.push(this.deck.pop());
         this.renderCpuHands();
         
-        // あがり判定
         if (logic.canGomen(cpu.hand)) {
             const points = logic.calculateYakuPoints(cpu.hand);
             this.showMessage(`${this.getPlayerName(cpuId)}: 御免！（${points}点）`);
@@ -305,7 +346,6 @@ const game = {
             return;
         }
         
-        // 捨てるカードを選ぶ
         const discardIdx = this.chooseCpuDiscard(cpu.hand);
         const card = cpu.hand.splice(discardIdx, 1)[0];
         this.lastDiscard = card;
@@ -313,7 +353,6 @@ const game = {
         this.updateDiscardDisplay();
         this.renderCpuHands();
         
-        // 他のプレイヤーが頂戴/御免できるかチェック
         await this.checkOthersInterrupt(card, cpuId);
         
         if (this.roundOver) return;
@@ -324,7 +363,6 @@ const game = {
     chooseCpuDiscard(hand) {
         const counts = logic.countByMonth(hand);
         
-        // 1枚しかない月のカードを優先的に捨てる
         for (let i = 0; i < hand.length; i++) {
             const card = hand[i];
             if (counts[card.monthNum] === 1) {
@@ -357,8 +395,7 @@ const game = {
             this.showMessage("あなたの勝ち！ 山札タップで次のラウンド");
         } else if (winnerId === 'draw') {
             this.showMessage("引き分け。山札タップで次のラウンド");
-            // ポットを分配
-            const share = Math.floor(this.pot / 4);
+            const share = Math.floor(this.pot / this.turnOrder.length);
             this.turnOrder.forEach(p => this.players[p].chips += share);
             this.pot = 0;
         } else {
@@ -381,11 +418,8 @@ const game = {
 
     startNewRound() {
         if (this.gameOver) {
-            // ゲームをリセット
-            this.turnOrder.forEach(p => {
-                this.players[p].chips = 500;
-            });
-            this.gameOver = false;
+            this.showModeSelect();
+            return;
         }
         this.init();
     },
@@ -395,7 +429,6 @@ const game = {
     // ========================================
 
     render() {
-        // プレイヤーの手札
         const container = document.getElementById('hand-container');
         container.innerHTML = '';
         
@@ -439,11 +472,13 @@ const game = {
             cpu2Container.innerHTML += '<div class="cpu-card"></div>';
         }
         
-        // CPU3（右）
-        const cpu3Container = document.getElementById('cpu3-hand');
-        cpu3Container.innerHTML = '';
-        for (let i = 0; i < this.players.cpu3.hand.length; i++) {
-            cpu3Container.innerHTML += '<div class="cpu-card"></div>';
+        // CPU3（右）- 4人戦のみ
+        if (this.playerCount === 4) {
+            const cpu3Container = document.getElementById('cpu3-hand');
+            cpu3Container.innerHTML = '';
+            for (let i = 0; i < this.players.cpu3.hand.length; i++) {
+                cpu3Container.innerHTML += '<div class="cpu-card"></div>';
+            }
         }
     },
 
@@ -464,7 +499,9 @@ const game = {
         document.getElementById('player-chips').innerText = this.players.player.chips;
         document.getElementById('cpu1-chips').innerText = this.players.cpu1.chips;
         document.getElementById('cpu2-chips').innerText = this.players.cpu2.chips;
-        document.getElementById('cpu3-chips').innerText = this.players.cpu3.chips;
+        if (this.playerCount === 4) {
+            document.getElementById('cpu3-chips').innerText = this.players.cpu3.chips;
+        }
         document.getElementById('pot-amount').innerText = this.pot;
     },
 
@@ -476,7 +513,6 @@ const game = {
             indicator.innerText = `🎴 ${this.getPlayerName(this.currentPlayer)}のターン`;
         }
 
-        // アクティブプレイヤーのハイライト
         document.querySelectorAll('.opponent-area, #player-info').forEach(el => {
             el.classList.remove('active-player');
         });
@@ -514,7 +550,6 @@ document.getElementById('deck').onclick = () => {
     if (game.phase === 'waiting' || game.roundOver) {
         game.startNewRound();
     } else if (game.phase === 'choudai') {
-        // 頂戴をスキップして山札を引く
         game.phase = 'draw';
         game.draw();
     } else {

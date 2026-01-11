@@ -7,7 +7,24 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-screen">
+    <!-- モード選択画面 -->
+    <div id="mode-select-screen">
+        <h1>🎴 九華</h1>
+        <p class="subtitle">Kyuka Online</p>
+        <div id="mode-buttons">
+            <button class="mode-btn" onclick="game.startWithPlayers(3)">
+                <span class="mode-icon">👤👤👤</span>
+                <span class="mode-text">3人対戦</span>
+            </button>
+            <button class="mode-btn" onclick="game.startWithPlayers(4)">
+                <span class="mode-icon">👤👤👤👤</span>
+                <span class="mode-text">4人対戦</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ゲーム画面 -->
+    <div id="game-screen" style="display: none;">
         <!-- 対面（CPU1） -->
         <div id="opponent-top" class="opponent-area">
             <div class="opponent-info">
@@ -46,7 +63,7 @@
                 </div>
             </div>
 
-            <!-- 右（CPU3） -->
+            <!-- 右（CPU3）- 4人戦のみ表示 -->
             <div id="opponent-right" class="opponent-area opponent-side">
                 <div class="opponent-info vertical">
                     <span class="player-name">CPU3</span>
@@ -81,6 +98,9 @@
         
         <!-- メッセージログ -->
         <div id="msg-log">山札をタップして開始</div>
+
+        <!-- メニューボタン -->
+        <button id="menu-btn" onclick="game.showModeSelect()">🏠</button>
     </div>
 
     <script src="card.js"></script>
